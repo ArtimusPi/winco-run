@@ -11,6 +11,25 @@
 <link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
 <title>WinCo Run</title>
 <style>
+  .nav-link{
+    font-size:12px;font-weight:700;color:var(--green);
+    text-decoration:none;border:1px solid var(--line);
+    border-radius:9px;padding:6px 10px;
+  }
+  .generated-banner{
+    margin:10px 16px 0;
+    background:var(--green-soft);border:1px solid var(--green);
+    border-radius:12px;padding:9px 12px;
+    font-size:13px;color:var(--green);font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+  }
+  .generated-banner-text{flex:1;min-width:0;}
+  .banner-dismiss{
+    background:none;border:none;color:var(--ink-soft);
+    font-size:18px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;
+  }
+</style>
+<style>
   :root{
     color-scheme:dark;
     --paper:#0e1910;
@@ -235,7 +254,7 @@
 <header>
   <div class="titlerow">
     <h1>WinCo Run</h1>
-    <span class="daterange">Thu&ndash;Sun &middot; dinners</span>
+    <a class="nav-link" href="./planner.html">Meal Planner</a>
   </div>
   <div class="controls">
     <div class="budget">
@@ -247,9 +266,10 @@
   </div>
 </header>
 
-<details class="menu">
+<div id="generated-banner"></div>
+<details class="menu" id="menu-details">
   <summary>This week's dinners</summary>
-  <div class="menulist">
+  <div class="menulist" id="menu-list">
     <div><b>Thu</b> &middot; Garlic butter shrimp over rice &nbsp;|&nbsp; backup: mac &amp; cheese + nuggets</div>
     <div><b>Fri</b> &middot; Ropa Vieja (Cuban shredded beef), rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
     <div><b>Sat</b> &middot; Instant Pot carnitas, rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
@@ -598,6 +618,68 @@ document.getElementById("taxtoggle").addEventListener("click", () => {
   tt.classList.toggle("on",state.taxOn);
 });
 
+/* ---- planner-generated list ---- */
+const GEN_KEY = "plannerGeneratedListV1";
+let generatedData = null;
+
+function loadGeneratedList(){
+  try{
+    const raw = localStorage.getItem(GEN_KEY);
+    if(raw) generatedData = JSON.parse(raw);
+  }catch(e){}
+}
+
+function applyGeneratedList(){
+  if(!generatedData) return;
+
+  // Replace DATA with generated grouped list
+  DATA.length = 0;
+  generatedData.grouped.forEach(g => DATA.push(g));
+
+  // Show banner
+  const banner = document.getElementById("generated-banner");
+  if(banner){
+    banner.innerHTML = "";
+    const wrap = document.createElement("div");
+    wrap.className = "generated-banner";
+    const text = document.createElement("div");
+    text.className = "generated-banner-text";
+    const when = new Date(generatedData.generatedAt);
+    text.textContent = "List from Meal Planner · " + when.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    const dismiss = document.createElement("button");
+    dismiss.className = "banner-dismiss";
+    dismiss.textContent = "×";
+    dismiss.setAttribute("aria-label","Dismiss and use manual list");
+    dismiss.addEventListener("click", ()=>{
+      if(confirm("Switch back to the manual shopping list?")){
+        localStorage.removeItem(GEN_KEY);
+        location.reload();
+      }
+    });
+    wrap.appendChild(text);
+    wrap.appendChild(dismiss);
+    banner.appendChild(wrap);
+  }
+
+  // Update menu summary
+  if(generatedData.weekSummary){
+    const menuList = document.getElementById("menu-list");
+    if(menuList){
+      menuList.innerHTML = "";
+      generatedData.weekSummary.split(" · ").forEach(entry=>{
+        const d = document.createElement("div");
+        const parts = entry.split(": ");
+        d.innerHTML = "<b>"+parts[0]+"</b> &middot; "+(parts[1]||"");
+        menuList.appendChild(d);
+      });
+      const summary = document.querySelector("#menu-details summary");
+      if(summary) summary.textContent = "This week's plan";
+    }
+  }
+}
+
+loadGeneratedList();
+applyGeneratedList();
 render();
 
 if("serviceWorker" in navigator){

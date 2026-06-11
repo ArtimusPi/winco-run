@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#15201b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WinCo Run">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
+<title>WinCo Run</title>
+<style>
+  :root{
+    --paper:#f4f5f3;
+    --card:#ffffff;
+    --ink:#161a17;
+    --ink-soft:#5d655e;
+    --line:#e3e6e2;
+    --green:#2e7d4f;
+    --green-soft:#e7f1ea;
+    --amber:#b9701a;
+    --amber-soft:#f6ecdd;
+    --red:#bf3b2e;
+    --bar:#15201b;
+    --bar-ink:#eef3ee;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.35;
+    padding-bottom:165px;
+  }
+
+  /* ---- top bar ---- */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  }
+  .titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  h1{font-size:20px;font-weight:800;letter-spacing:-0.01em;margin:0;}
+  .daterange{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .controls{display:flex;align-items:center;gap:8px;margin-top:10px;}
+  .budget{
+    display:flex;align-items:center;gap:6px;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:6px 10px;flex:1;
+  }
+  .budget label{font-size:12px;color:var(--ink-soft);font-weight:700;white-space:nowrap;}
+  .budget input{
+    border:0;outline:0;background:transparent;width:100%;
+    font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink);
+  }
+  .progress{
+    font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .hidebtn{
+    font-size:11px;font-weight:800;letter-spacing:0.03em;
+    color:var(--ink-soft);background:#fff;border:1px solid var(--line);
+    border-radius:8px;padding:6px 8px;cursor:pointer;white-space:nowrap;
+  }
+  .hidebtn.on{color:var(--green);border-color:var(--green);background:var(--green-soft);}
+
+  /* ---- menu reference ---- */
+  details.menu{margin:12px 16px 0;}
+  details.menu>summary{
+    list-style:none;cursor:pointer;
+    font-size:13px;font-weight:700;color:var(--green);
+    padding:8px 0;
+  }
+  details.menu>summary::-webkit-details-marker{display:none;}
+  details.menu>summary::after{content:" ▾";}
+  details.menu[open]>summary::after{content:" ▴";}
+  .menulist{font-size:13px;color:var(--ink-soft);padding:2px 0 6px;}
+  .menulist div{padding:3px 0;}
+  .menulist b{color:var(--ink);}
+
+  /* ---- sections ---- */
+  main{padding:6px 16px 0;}
+  .section{margin-top:18px;}
+  .section h2{
+    font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 8px 2px;
+  }
+
+  .item{
+    display:flex;align-items:flex-start;gap:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:12px;margin-bottom:8px;
+    position:relative;
+  }
+  .item.checked{background:#fbfcfb;border-color:#eef1ee;}
+  .check{
+    flex:0 0 auto;width:30px;height:30px;border-radius:9px;
+    border:2px solid var(--line);background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;color:#fff;font-weight:900;cursor:pointer;margin-top:1px;
+  }
+  .item.checked .check{background:var(--green);border-color:var(--green);}
+  .check::after{content:"✓";opacity:0;}
+  .item.checked .check::after{opacity:1;}
+
+  .body{flex:1;min-width:0;}
+  .name{font-size:15.5px;font-weight:700;letter-spacing:-0.01em;padding-right:22px;}
+  .item.checked .name{text-decoration:line-through;color:var(--ink-soft);}
+  .note{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+  .tag{
+    display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:0.05em;
+    color:var(--amber);background:var(--amber-soft);
+    padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;
+  }
+
+  .pricerow{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .field{
+    display:flex;align-items:center;gap:3px;
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    padding:7px 10px;
+  }
+  .field .pre{font-family:var(--mono);font-size:14px;color:var(--ink-soft);font-weight:700;}
+  .field input{
+    border:0;outline:0;background:transparent;
+    font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink);
+    width:64px;
+  }
+  .field.wt input{width:52px;}
+  .field .suf{font-size:12px;color:var(--ink-soft);font-weight:700;}
+  .x{font-family:var(--mono);color:var(--ink-soft);font-weight:700;font-size:14px;}
+
+  .linetotal{
+    margin-left:auto;font-family:var(--mono);font-size:15px;font-weight:800;
+    color:var(--green);white-space:nowrap;
+  }
+  .linetotal.empty{color:var(--line);}
+
+  .modetoggle{
+    font-size:11px;font-weight:800;letter-spacing:0.03em;
+    color:var(--ink-soft);background:#fff;border:1px solid var(--line);
+    border-radius:8px;padding:6px 8px;cursor:pointer;
+  }
+  .modetoggle.on{color:var(--amber);border-color:var(--amber);background:var(--amber-soft);}
+
+  /* ---- delete button ---- */
+  .delbtn{
+    position:absolute;top:8px;right:10px;
+    width:20px;height:20px;border-radius:50%;
+    background:transparent;border:none;
+    color:var(--ink-soft);font-size:16px;font-weight:400;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0.45;padding:0;
+  }
+  .delbtn:active{opacity:1;color:var(--red);}
+
+  /* ---- add-item UI ---- */
+  .addbtn{
+    width:100%;text-align:left;
+    font-size:13px;font-weight:700;color:var(--green);
+    background:none;border:1.5px dashed var(--line);border-radius:12px;
+    padding:10px 14px;cursor:pointer;margin-bottom:8px;
+  }
+  .addbtn:active{background:var(--green-soft);border-color:var(--green);}
+  .addform{
+    background:var(--card);border:1.5px solid var(--green);border-radius:14px;
+    padding:12px;margin-bottom:8px;
+  }
+  .addform input{
+    display:block;width:100%;
+    border:1px solid var(--line);border-radius:10px;
+    padding:9px 10px;font-size:15px;font-family:var(--sans);
+    background:var(--paper);color:var(--ink);outline:none;
+    margin-bottom:8px;
+  }
+  .addform input:focus{border-color:var(--green);}
+  .addactions{display:flex;gap:8px;}
+  .addconfirm{
+    flex:1;background:var(--green);color:#fff;
+    border:0;border-radius:10px;padding:10px 14px;
+    font-size:14px;font-weight:700;cursor:pointer;
+  }
+  .addcancel{
+    background:var(--paper);color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:10px;padding:10px 14px;
+    font-size:14px;font-weight:700;cursor:pointer;
+  }
+
+  /* ---- receipt bar ---- */
+  footer{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:var(--bar);color:var(--bar-ink);
+    padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);
+    border-top-left-radius:18px;border-top-right-radius:18px;
+    box-shadow:0 -8px 24px rgba(0,0,0,0.16);
+  }
+  .totrow{display:flex;align-items:baseline;justify-content:space-between;}
+  .totlabel{font-size:13px;font-weight:700;opacity:0.8;}
+  .tot{font-family:var(--mono);font-size:30px;font-weight:800;letter-spacing:-0.02em;}
+  .taxrow{
+    display:flex;align-items:center;gap:8px;margin-top:5px;
+    font-size:12px;opacity:0.75;
+  }
+  .taxlabel{font-weight:600;}
+  .taxamt{font-family:var(--mono);font-weight:700;margin-left:4px;}
+  .taxtoggle{
+    margin-left:auto;
+    font-size:11px;font-weight:800;letter-spacing:0.02em;
+    color:rgba(238,243,238,0.65);
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:7px;padding:4px 9px;cursor:pointer;
+  }
+  .taxtoggle.on{color:#a8d5b8;border-color:rgba(168,213,184,0.5);background:rgba(168,213,184,0.12);}
+  .subrow{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:6px;font-size:12.5px;
+  }
+  .remaining{font-family:var(--mono);font-weight:700;opacity:0.85;}
+  .remaining.over{color:#ff8a7d;opacity:1;}
+  .reset{
+    background:transparent;border:1px solid rgba(255,255,255,0.28);
+    color:var(--bar-ink);font-size:12px;font-weight:700;
+    border-radius:9px;padding:6px 12px;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="titlerow">
+    <h1>WinCo Run</h1>
+    <span class="daterange">Thu&ndash;Sun &middot; dinners</span>
+  </div>
+  <div class="controls">
+    <div class="budget">
+      <label for="budget">Budget $</label>
+      <input id="budget" inputmode="decimal" placeholder="optional">
+    </div>
+    <span class="progress" id="progress">0/0 in cart</span>
+    <button class="hidebtn" id="hidebtn">hide done</button>
+  </div>
+</header>
+
+<details class="menu">
+  <summary>This week's dinners</summary>
+  <div class="menulist">
+    <div><b>Thu</b> &middot; Garlic butter shrimp over rice &nbsp;|&nbsp; backup: mac &amp; cheese + nuggets</div>
+    <div><b>Fri</b> &middot; Ropa Vieja (Cuban shredded beef), rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
+    <div><b>Sat</b> &middot; Instant Pot carnitas, rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
+    <div><b>Sun</b> &middot; Moros y Cristianos + leftover carnitas &nbsp;|&nbsp; backup: spaghetti/nuggets</div>
+  </div>
+</details>
+
+<main id="list"></main>
+
+<footer>
+  <div class="totrow">
+    <span class="totlabel">Cart total</span>
+    <span class="tot" id="total">$0.00</span>
+  </div>
+  <div class="taxrow">
+    <span class="taxlabel">est. tax</span>
+    <span class="taxamt" id="taxamt"></span>
+    <button class="taxtoggle" id="taxtoggle">8.375% off</button>
+  </div>
+  <div class="subrow">
+    <span class="remaining" id="remaining">&nbsp;</span>
+    <button class="reset" id="reset">Reset</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- data ----------
+   weighed:true  -> default to price-per-lb mode
+   bulk:true     -> shows the BULK tag
+   When the menu changes: edit shopping-data.md first, then mirror here. */
+const DATA = [
+  { section:"Produce", items:[
+    { id:"onions",     name:"Yellow onions",         note:"1 bag (3 lb) – runs through every dish" },
+    { id:"chiles",     name:"Serrano or jalapeño", note:"2 – optional, mild heat" },
+    { id:"bellpeppers",name:"Bell peppers",           note:"2 – Ropa Vieja (both) + moros (optional)" },
+    { id:"cilantro",   name:"Cilantro",               note:"1 bunch" },
+    { id:"limes",      name:"Limes",                  note:"5, or a small bag" },
+    { id:"oranges",    name:"Oranges",                note:"1–2 – for carnitas (need 1, sub lime if needed)" },
+  ]},
+  { section:"Bulk Bins", items:[
+    { id:"blackbeans", name:"Dried black beans", note:"about 2 lb – anchors beans & Sunday moros", bulk:true, weighed:true },
+  ]},
+  { section:"Meat & Seafood", items:[
+    { id:"chuckroast", name:"Chuck roast",      note:"~2 lb – Ropa Vieja, Friday" },
+    { id:"shrimp",     name:"Frozen shrimp",    note:"1 lb, peeled if cheap – Thursday" },
+    { id:"pork",       name:"Pork shoulder / butt", note:"~4 lb – carnitas, covers Sat & Sun" },
+  ]},
+  { section:"Dairy", items:[
+    { id:"cheese", name:"Cheese, cheddar or melting block/shred", note:"1 large – quesadillas & mac" },
+    { id:"eggs",   name:"Eggs",   note:"1 dozen (optional cheap backup)" },
+    { id:"milk",   name:"Milk",   note:"only if you're out – for the boxed mac" },
+  ]},
+  { section:"Canned & Dry", items:[
+    { id:"tomatosauce",    name:"Tomato sauce",             note:"1 small can (8 oz) – Ropa Vieja + moros" },
+    { id:"dicedtomatoes", name:"Diced or crushed tomatoes", note:"1 can (14–15 oz) – Ropa Vieja" },
+    { id:"whitevnegar",   name:"White vinegar",             note:"small bottle – Ropa Vieja + moros" },
+    { id:"macncheese",  name:"Boxed mac & cheese",  note:"2 boxes (Thursday backup)" },
+    { id:"spaghetti",   name:"Spaghetti",            note:"1 box (1 lb), backup" },
+    { id:"marinara",    name:"Jar marinara / red sauce", note:"1 jar, backup" },
+    { id:"tortillas",   name:"Soft tortillas",       note:"1 pack – carnitas + general" },
+  ]},
+  { section:"Frozen", items:[
+    { id:"nuggets", name:"Frozen chicken nuggets",            note:"1 bag, backup" },
+    { id:"dessert", name:"Popsicles or ice cream sandwiches", note:"1 box – dessert" },
+  ]},
+];
+
+const KEY = "wincoRunV3";
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { budget:"", hideChecked:false, taxOn:false, items:{}, custom:[] };
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+}
+function st(id){
+  if(!state.items[id]) state.items[id] = { checked:false, mode:null, price:"", ppl:"", wt:"", hidden:false };
+  return state.items[id];
+}
+function num(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function lineTotal(item){
+  const s = st(item.id);
+  const mode = s.mode || (item.weighed ? "weight" : "flat");
+  return mode === "weight" ? num(s.ppl) * num(s.wt) : num(s.price);
+}
+function money(n){ return "$" + n.toFixed(2); }
+function customForSection(section){ return (state.custom||[]).filter(c => c.section===section && !st(c.id).hidden); }
+
+/* ---- render ---- */
+function render(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  DATA.forEach(group => {
+    const sec = document.createElement("section");
+    sec.className = "section";
+    const h = document.createElement("h2");
+    h.textContent = group.section;
+    sec.appendChild(h);
+
+    group.items.forEach(item => {
+      if(st(item.id).hidden) return;
+      if(state.hideChecked && st(item.id).checked) return;
+      sec.appendChild(buildRow(item));
+    });
+    customForSection(group.section).forEach(item => {
+      if(state.hideChecked && st(item.id).checked) return;
+      sec.appendChild(buildRow(item));
+    });
+
+    /* add-item area */
+    const addWrap = document.createElement("div");
+    addWrap.dataset.section = group.section;
+    sec.appendChild(addWrap);
+    showAddBtn(addWrap, group.section);
+
+    list.appendChild(sec);
+  });
+
+  updateTotals();
+
+  const b = document.getElementById("budget");
+  if(b.value !== (state.budget||"")) b.value = state.budget||"";
+
+  const hb = document.getElementById("hidebtn");
+  hb.textContent = state.hideChecked ? "show all" : "hide done";
+  hb.classList.toggle("on", !!state.hideChecked);
+
+  const tt = document.getElementById("taxtoggle");
+  tt.textContent = state.taxOn ? "8.375% on" : "8.375% off";
+  tt.classList.toggle("on", !!state.taxOn);
+}
+
+function showAddBtn(wrap, section){
+  wrap.innerHTML = "";
+  const btn = document.createElement("button");
+  btn.className = "addbtn";
+  btn.textContent = "+ add item";
+  btn.addEventListener("click", () => showAddForm(wrap, section));
+  wrap.appendChild(btn);
+}
+
+function showAddForm(wrap, section){
+  wrap.innerHTML = "";
+  const form = document.createElement("div");
+  form.className = "addform";
+
+  const nameIn = document.createElement("input");
+  nameIn.type = "text";
+  nameIn.placeholder = "Item name";
+  nameIn.setAttribute("autocapitalize","sentences");
+
+  const noteIn = document.createElement("input");
+  noteIn.type = "text";
+  noteIn.placeholder = "Note (optional)";
+  noteIn.setAttribute("autocapitalize","sentences");
+
+  const acts = document.createElement("div");
+  acts.className = "addactions";
+
+  const ok = document.createElement("button");
+  ok.className = "addconfirm";
+  ok.textContent = "Add";
+  ok.addEventListener("click", () => {
+    const name = nameIn.value.trim();
+    if(!name){ nameIn.focus(); return; }
+    if(!state.custom) state.custom = [];
+    state.custom.push({ id:"custom_"+Date.now(), section, name, note:noteIn.value.trim() });
+    save(); render();
+  });
+
+  const cancel = document.createElement("button");
+  cancel.className = "addcancel";
+  cancel.textContent = "Cancel";
+  cancel.addEventListener("click", () => showAddBtn(wrap, section));
+
+  acts.appendChild(ok);
+  acts.appendChild(cancel);
+  form.appendChild(nameIn);
+  form.appendChild(noteIn);
+  form.appendChild(acts);
+  wrap.appendChild(form);
+  nameIn.focus();
+}
+
+function buildRow(item){
+  const s = st(item.id);
+  const mode = s.mode || (item.weighed ? "weight" : "flat");
+  const isCustom = String(item.id).startsWith("custom_");
+
+  const el = document.createElement("div");
+  el.className = "item" + (s.checked ? " checked" : "");
+
+  /* delete × */
+  const del = document.createElement("button");
+  del.className = "delbtn";
+  del.textContent = "×";
+  del.setAttribute("aria-label","Remove "+item.name);
+  del.addEventListener("click", e => {
+    e.stopPropagation();
+    const msg = isCustom
+      ? "Remove “"+item.name+"”?"
+      : "Hide “"+item.name+"” this run?\n(Reset brings it back)";
+    if(confirm(msg)){
+      if(isCustom){
+        state.custom = (state.custom||[]).filter(c => c.id!==item.id);
+      } else {
+        st(item.id).hidden = true;
+      }
+      save(); render();
+    }
+  });
+  el.appendChild(del);
+
+  /* checkmark */
+  const check = document.createElement("div");
+  check.className = "check";
+  check.setAttribute("role","button");
+  check.setAttribute("aria-label","Mark "+item.name+" as in cart");
+  check.addEventListener("click", () => { s.checked=!s.checked; save(); render(); });
+
+  /* body */
+  const body = document.createElement("div");
+  body.className = "body";
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = item.name;
+  if(item.bulk){ const t=document.createElement("span"); t.className="tag"; t.textContent="BULK"; name.appendChild(t); }
+  name.addEventListener("click", () => { s.checked=!s.checked; save(); render(); });
+
+  const note = document.createElement("div");
+  note.className = "note";
+  note.textContent = item.note||"";
+
+  /* price row */
+  const pr = document.createElement("div");
+  pr.className = "pricerow";
+
+  if(mode==="weight"){
+    pr.appendChild(mkField("$", s.ppl, "/lb", v=>{ s.ppl=v; save(); updateTotals(); }, "ppl-"+item.id));
+    const x=document.createElement("span"); x.className="x"; x.textContent="×"; pr.appendChild(x);
+    pr.appendChild(mkField("", s.wt, "lb", v=>{ s.wt=v; save(); updateTotals(); }, "wt-"+item.id, true));
+  } else {
+    pr.appendChild(mkField("$", s.price, "", v=>{ s.price=v; save(); updateTotals(); }, "price-"+item.id));
+  }
+
+  const tog = document.createElement("button");
+  tog.className = "modetoggle"+(mode==="weight"?" on":"");
+  tog.textContent = "by lb";
+  tog.setAttribute("aria-pressed", mode==="weight");
+  tog.addEventListener("click", () => { s.mode=(mode==="weight")?"flat":"weight"; save(); render(); });
+  pr.appendChild(tog);
+
+  const lt = document.createElement("span");
+  lt.className = "linetotal";
+  lt.id = "lt-"+item.id;
+  pr.appendChild(lt);
+
+  body.appendChild(name);
+  body.appendChild(note);
+  body.appendChild(pr);
+  el.appendChild(check);
+  el.appendChild(body);
+  return el;
+}
+
+function mkField(pre, val, suf, onInput, id, isWt){
+  const wrap = document.createElement("div");
+  wrap.className = "field"+(isWt?" wt":"");
+  if(pre){ const p=document.createElement("span"); p.className="pre"; p.textContent=pre; wrap.appendChild(p); }
+  const inp = document.createElement("input");
+  inp.type="text"; inp.inputMode="decimal"; inp.id=id;
+  inp.value=val||""; inp.placeholder=isWt?"0":"0.00";
+  inp.addEventListener("input", e=>{ onInput(e.target.value); });
+  wrap.appendChild(inp);
+  if(suf){ const sf=document.createElement("span"); sf.className="suf"; sf.textContent=suf; wrap.appendChild(sf); }
+  return wrap;
+}
+
+/* ---- totals (only checked items count toward cart total) ---- */
+function updateTotals(){
+  let total=0, inCart=0, count=0;
+
+  function tally(item){
+    const s = st(item.id);
+    if(s.hidden) return;
+    count++;
+    const lt = lineTotal(item);
+    if(s.checked){ total+=lt; inCart++; }
+    const cell = document.getElementById("lt-"+item.id);
+    if(cell){
+      if(lt>0){ cell.textContent=money(lt); cell.classList.remove("empty"); }
+      else { cell.textContent="—"; cell.classList.add("empty"); }
+    }
+  }
+
+  DATA.forEach(g => g.items.forEach(tally));
+  (state.custom||[]).forEach(tally);
+
+  const TAX = 0.08375;
+  const taxAmt = state.taxOn ? total*TAX : 0;
+  const grand = total+taxAmt;
+
+  document.getElementById("total").textContent = money(grand);
+  document.getElementById("progress").textContent = inCart+"/"+count+" in cart";
+
+  const taxEl = document.getElementById("taxamt");
+  if(taxEl) taxEl.textContent = state.taxOn ? money(taxAmt) : "";
+
+  const rem = document.getElementById("remaining");
+  const budget = num(state.budget);
+  if(budget>0){
+    const left = budget-grand;
+    if(left>=0){ rem.textContent=money(left)+" left of "+money(budget); rem.classList.remove("over"); }
+    else { rem.textContent=money(Math.abs(left))+" over budget"; rem.classList.add("over"); }
+  } else {
+    rem.innerHTML="&nbsp;";
+    rem.classList.remove("over");
+  }
+}
+
+/* ---- event wiring ---- */
+document.getElementById("budget").addEventListener("input", e => {
+  state.budget=e.target.value; save(); updateTotals();
+});
+document.getElementById("reset").addEventListener("click", () => {
+  if(confirm("Clear all prices, checkmarks, and hidden items?")){
+    state={ budget:"", hideChecked:false, taxOn:false, items:{}, custom:[] };
+    save(); render();
+  }
+});
+document.getElementById("hidebtn").addEventListener("click", () => {
+  state.hideChecked=!state.hideChecked; save(); render();
+});
+document.getElementById("taxtoggle").addEventListener("click", () => {
+  state.taxOn=!state.taxOn; save();
+  updateTotals();
+  const tt=document.getElementById("taxtoggle");
+  tt.textContent=state.taxOn?"8.375% on":"8.375% off";
+  tt.classList.toggle("on",state.taxOn);
+});
+
+render();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>

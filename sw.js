@@ -1,7 +1,7 @@
 /* WinCo Run service worker
    Caches the app shell so it keeps working with no signal in the store.
    Bump CACHE when you change any file so phones pull the new version. */
-const CACHE = "winco-run-v3";
+const CACHE = "winco-run-v4";
 const ASSETS = [
   "./",
   "./index.html",

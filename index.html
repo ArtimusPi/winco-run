@@ -369,14 +369,16 @@ function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
 }
 function st(id){
-  if(!state.items[id]) state.items[id] = { checked:false, mode:null, price:"", ppl:"", wt:"", hidden:false };
+  if(!state.items[id]) state.items[id] = { checked:false, mode:null, price:"", ppl:"", wt:"", qty:"", hidden:false };
   return state.items[id];
 }
 function num(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
 function lineTotal(item){
   const s = st(item.id);
   const mode = s.mode || (item.weighed ? "weight" : "flat");
-  return mode === "weight" ? num(s.ppl) * num(s.wt) : num(s.price);
+  if(mode === "weight") return num(s.ppl) * num(s.wt);
+  if(mode === "qty")    return num(s.ppl) * num(s.qty);
+  return num(s.price);
 }
 function money(n){ return "$" + n.toFixed(2); }
 function customForSection(section){ return (state.custom||[]).filter(c => c.section===section && !st(c.id).hidden); }
@@ -536,15 +538,25 @@ function buildRow(item){
     pr.appendChild(mkField("$", s.ppl, "/lb", v=>{ s.ppl=v; save(); updateTotals(); }, "ppl-"+item.id));
     const x=document.createElement("span"); x.className="x"; x.textContent="×"; pr.appendChild(x);
     pr.appendChild(mkField("", s.wt, "lb", v=>{ s.wt=v; save(); updateTotals(); }, "wt-"+item.id, true));
+  } else if(mode==="qty"){
+    pr.appendChild(mkField("$", s.ppl, "/ea", v=>{ s.ppl=v; save(); updateTotals(); }, "ppl-"+item.id));
+    const x=document.createElement("span"); x.className="x"; x.textContent="×"; pr.appendChild(x);
+    pr.appendChild(mkField("", s.qty, "qty", v=>{ s.qty=v; save(); updateTotals(); }, "qty-"+item.id, true));
   } else {
     pr.appendChild(mkField("$", s.price, "", v=>{ s.price=v; save(); updateTotals(); }, "price-"+item.id));
   }
 
   const tog = document.createElement("button");
-  tog.className = "modetoggle"+(mode==="weight"?" on":"");
-  tog.textContent = "by lb";
-  tog.setAttribute("aria-pressed", mode==="weight");
-  tog.addEventListener("click", () => { s.mode=(mode==="weight")?"flat":"weight"; save(); render(); });
+  const modeActive = mode !== "flat";
+  tog.className = "modetoggle"+(modeActive?" on":"");
+  tog.textContent = mode==="qty" ? "by ea" : "by lb";
+  tog.setAttribute("aria-pressed", modeActive);
+  tog.addEventListener("click", () => {
+    if(mode==="flat")   s.mode="weight";
+    else if(mode==="weight") s.mode="qty";
+    else                s.mode="flat";
+    save(); render();
+  });
   pr.appendChild(tog);
 
   const lt = document.createElement("span");

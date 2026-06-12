@@ -712,8 +712,52 @@ loadGeneratedList();
 applyGeneratedList();
 render();
 
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+if ("serviceWorker" in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!refreshing) { refreshing = true; window.location.reload(); }
+  });
+
+  navigator.serviceWorker.register("./sw.js").then(reg => {
+    // New SW already waiting when page loads (e.g. user had it open during deploy)
+    if (reg.waiting) showUpdateBanner(reg);
+
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller) {
+          showUpdateBanner(reg);
+        }
+      });
+    });
+  }).catch(() => {});
+}
+
+function showUpdateBanner(reg) {
+  if (document.getElementById("sw-update-banner")) return;
+  const bar = document.createElement("div");
+  bar.id = "sw-update-banner";
+  bar.style.cssText = [
+    "position:fixed;top:0;left:0;right:0;z-index:999",
+    "background:#52c97a;color:#fff",
+    "padding:14px 16px",
+    "display:flex;align-items:center;justify-content:space-between;gap:12px",
+    "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+    "font-size:14px;font-weight:700",
+  ].join(";");
+  const msg = document.createElement("span");
+  msg.textContent = "Update available";
+  const btn = document.createElement("button");
+  btn.textContent = "Reload";
+  btn.style.cssText = [
+    "background:#fff;color:#0e1910;border:none",
+    "border-radius:8px;padding:8px 14px",
+    "font-size:13px;font-weight:800;cursor:pointer",
+  ].join(";");
+  btn.onclick = () => reg.waiting.postMessage("skipWaiting");
+  bar.appendChild(msg);
+  bar.appendChild(btn);
+  document.body.prepend(bar);
 }
 </script>
 </body>

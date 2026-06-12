@@ -10,6 +10,23 @@ const PANTRY_DEFAULTS = new Set([
   'salt','black-pepper','cooking-oil','knorr-de-pollo','garlic-minced-jar'
 ]);
 
+/* ---------- recurring items ----------
+   Always appended to every generated shopping list.
+   section:'Other Store' = reminder items bought elsewhere (pets, etc.)
+   Add/remove items here to control what always appears on the list. */
+const RECURRING_ITEMS = [
+  // WinCo — always buy
+  { id:'rec-turtle-greens',  name:'Turtle greens',  section:'Produce',      note:'romaine, collards, or dandelion greens — for turtle' },
+  { id:'rec-bread',          name:'Bread',           section:'Canned & Dry', note:'sliced loaf' },
+  { id:'rec-paper-towels',   name:'Paper towels',    section:'Household',    note:'' },
+  { id:'rec-dish-soap',      name:'Dish soap',       section:'Household',    note:'' },
+  { id:'rec-trash-bags',     name:'Trash bags',      section:'Household',    note:'' },
+  // Other store — reminder only
+  { id:'rec-cat-food',   name:'Cat food',   section:'Other Store', note:'' },
+  { id:'rec-dog-food',   name:'Dog food',   section:'Other Store', note:'' },
+  { id:'rec-cat-litter', name:'Cat litter', section:'Other Store', note:'' },
+];
+
 /* ---------- recipe library ---------- */
 const RECIPES = [
 
@@ -532,11 +549,93 @@ const RECIPES = [
     ]
   },
 
+  /* ── ADDED TO LIBRARY ───────────────────────────────── */
+
+  {
+    id: 'peas-and-shells',
+    name: 'Peas and Shells',
+    subtitle: 'with pancetta or ham',
+    category: 'main',
+    servings: 6,
+    time: 30,
+    sourceUrl: null,
+    ingredients: [
+      { id:'shell-pasta',    name:'Small shell pasta',    amount:1,  unit:'lb',     section:'Canned & Dry',   bulk:false },
+      { id:'frozen-peas',    name:'Frozen peas',           amount:1,  unit:'bag',    section:'Frozen',         bulk:false },
+      { id:'chicken-broth',  name:'Chicken broth',         amount:1,  unit:'carton', section:'Canned & Dry',   bulk:false },
+      { id:'yellow-onion',   name:'Yellow onions',          amount:1,  unit:'ct',     section:'Produce',        bulk:false },
+      { id:'garlic',         name:'Garlic',                 amount:5,  unit:'cloves', section:'Produce',        bulk:false, pantry:true },
+      { id:'pancetta',       name:'Pancetta or diced ham',  amount:6,  unit:'oz',     section:'Meat & Seafood', bulk:false },
+    ],
+    steps:[
+      'If using pancetta: render in a wide, deep pan over medium heat until fat has released and edges are just crisping. Remove bits, leave fat in pan. If using ham: heat 1 tbsp oil instead.',
+      'Add diced onion, cook over medium-high heat 7–8 min until golden and just starting to brown.',
+      'Deglaze with a splash of broth (~¼ cup), scraping up any stuck bits.',
+      'Add garlic, cook 1 min until fragrant. Season with salt, pepper, and red pepper flakes if using.',
+      'Add frozen peas and remaining broth. Bring to a simmer, cook 3–4 min until peas are tender.',
+      'Pull out about 1 cup of peas and broth, blend smooth, stir back in to thicken the sauce.',
+      'Bring back to a simmer. Add pasta (and ham if using). Cook, stirring often, until al dente — 8–10 min. Add water if it gets too thick.',
+      'Stir in pancetta (if using). Taste and adjust seasoning. Serve with parmesan if available.',
+    ]
+  },
+
+  {
+    id: 'hamburger-helper',
+    name: 'Hamburger Helper',
+    subtitle: 'boxed',
+    category: 'main',
+    servings: 4,
+    time: 25,
+    sourceUrl: null,
+    ingredients: [
+      { id:'hamburger-helper-box', name:'Hamburger Helper',   amount:1,    unit:'box',  section:'Canned & Dry',   bulk:false },
+      { id:'ground-beef',          name:'Ground beef (80/20)', amount:1.25, unit:'lb',   section:'Meat & Seafood', bulk:false },
+      { id:'milk',                 name:'Milk',               amount:1,    unit:'cup',  section:'Dairy',          bulk:false },
+      { id:'butter',               name:'Butter',             amount:2,    unit:'tbsp', section:'Dairy',          bulk:false, pantry:true },
+    ],
+    steps:[
+      'Brown ground beef in a large skillet over medium-high heat. Drain fat.',
+      'Add water, milk, sauce mix, and pasta per box directions.',
+      'Bring to a boil, reduce heat to medium.',
+      'Simmer uncovered 10–12 min, stirring occasionally, until pasta is tender.',
+    ]
+  },
+
+  {
+    id: 'fried-rice',
+    name: 'Fried Rice',
+    subtitle: 'egg fried rice',
+    category: 'main',
+    servings: 4,
+    time: 20,
+    sourceUrl: null,
+    ingredients: [
+      { id:'white-rice',       name:'White rice (day-old)',    amount:3,   unit:'cups',  section:'Bulk Bins',      bulk:true,  pantry:true },
+      { id:'eggs',             name:'Eggs',                    amount:4,   unit:'ct',    section:'Dairy',          bulk:false },
+      { id:'soy-sauce',        name:'Soy sauce',               amount:3,   unit:'tbsp',  section:'Canned & Dry',   bulk:false },
+      { id:'sesame-oil',       name:'Sesame oil',              amount:1,   unit:'tbsp',  section:'Canned & Dry',   bulk:false },
+      { id:'frozen-mixed-veg', name:'Frozen peas & carrots',   amount:1,   unit:'cup',   section:'Frozen',         bulk:false },
+      { id:'green-onion',      name:'Green onions',            amount:4,   unit:'stalks',section:'Produce',        bulk:false },
+      { id:'garlic',           name:'Garlic',                  amount:3,   unit:'cloves',section:'Produce',        bulk:false, pantry:true },
+      { id:'cooking-oil',      name:'Cooking oil',             amount:2,   unit:'tbsp',  section:'Canned & Dry',   bulk:false, pantry:true },
+    ],
+    steps:[
+      'Use cold day-old rice — cook it ahead if needed and refrigerate uncovered.',
+      'Heat oil in a wok or large skillet over high heat until shimmering.',
+      'Add garlic, stir-fry 30 seconds. Push to the side.',
+      'Crack eggs into the pan, scramble and break into small pieces as they cook.',
+      'Add frozen peas and carrots, stir-fry 2 min.',
+      'Add rice, breaking up any clumps. Stir-fry 3–4 min until some grains are lightly crisped.',
+      'Drizzle soy sauce and sesame oil over, toss to coat evenly.',
+      'Top with sliced green onion and serve.',
+    ]
+  },
+
 ]; /* end RECIPES */
 
 /* ---------- section sort order ---------- */
 const SECTION_ORDER = [
-  'Produce','Bulk Bins','Meat & Seafood','Dairy','Canned & Dry','Frozen','Spices','Other'
+  'Produce','Bulk Bins','Meat & Seafood','Dairy','Canned & Dry','Frozen','Spices','Household','Other Store','Other'
 ];
 
 /* ---------- localStorage helpers ---------- */
@@ -601,6 +700,13 @@ function generateShoppingList(weekPlan, kidBackupPlan, pantrySet) {
     addRecipe(kidBackupPlan[d]);
   });
 
+  // Append recurring items (skip any already pulled in by a recipe)
+  for (const item of RECURRING_ITEMS) {
+    if (!combined[item.id]) {
+      combined[item.id] = { ...item };
+    }
+  }
+
   // Format for shopping list (compatible with index.html DATA format)
   return Object.values(combined)
     .sort((a, b) => {
@@ -611,7 +717,8 @@ function generateShoppingList(weekPlan, kidBackupPlan, pantrySet) {
     .map(ing => ({
       id: ing.id,
       name: ing.name,
-      note: formatIngNote(ing),
+      // Use explicit note if present (recurring items), otherwise format from amount/unit
+      note: 'note' in ing ? (ing.note || '') : formatIngNote(ing),
       bulk: ing.bulk || false,
       weighed: ing.weighed || false,
       section: ing.section,

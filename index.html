@@ -268,12 +268,17 @@
 
 <div id="generated-banner"></div>
 <details class="menu" id="menu-details">
-  <summary>This week's dinners</summary>
+  <summary>Dinner plan — Jun 13–21</summary>
   <div class="menulist" id="menu-list">
-    <div><b>Thu</b> &middot; Garlic butter shrimp over rice &nbsp;|&nbsp; backup: mac &amp; cheese + nuggets</div>
-    <div><b>Fri</b> &middot; Ropa Vieja (Cuban shredded beef), rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
-    <div><b>Sat</b> &middot; Instant Pot carnitas, rice &amp; beans &nbsp;|&nbsp; backup: spaghetti</div>
-    <div><b>Sun</b> &middot; Moros y Cristianos + leftover carnitas &nbsp;|&nbsp; backup: spaghetti/nuggets</div>
+    <div><b>Fri 6/13</b> &middot; Going out</div>
+    <div><b>Sat 6/14</b> &middot; Hamburger Helper</div>
+    <div><b>Sun 6/15</b> &middot; Peas &amp; Shells</div>
+    <div><b>Mon 6/16</b> &middot; Garlic Butter Shrimp</div>
+    <div><b>Tue 6/17</b> &middot; Ropa Vieja</div>
+    <div><b>Wed 6/18</b> &middot; Frozen Pizza &nbsp;&bull;&nbsp; <em>kids cook</em></div>
+    <div><b>Thu 6/19</b> &middot; Fried Rice</div>
+    <div><b>Fri 6/20</b> &middot; Kids pick</div>
+    <div><b>Sat 6/21</b> &middot; Carnitas</div>
   </div>
 </details>
 
@@ -302,38 +307,51 @@
    When the menu changes: edit shopping-data.md first, then mirror here. */
 const DATA = [
   { section:"Produce", items:[
-    { id:"onions",     name:"Yellow onions",         note:"1 bag (3 lb) – runs through every dish" },
-    { id:"chiles",     name:"Serrano or jalapeño", note:"2 – optional, mild heat" },
-    { id:"bellpeppers",name:"Bell peppers",           note:"2 – Ropa Vieja (both) + moros (optional)" },
-    { id:"cilantro",   name:"Cilantro",               note:"1 bunch" },
-    { id:"limes",      name:"Limes",                  note:"5, or a small bag" },
-    { id:"oranges",    name:"Oranges",                note:"1–2 – for carnitas (need 1, sub lime if needed)" },
-  ]},
-  { section:"Bulk Bins", items:[
-    { id:"blackbeans", name:"Dried black beans", note:"about 2 lb – anchors beans & Sunday moros", bulk:true, weighed:true },
+    { id:"onions",            name:"Yellow onions",   note:"2 – Peas & Shells + Ropa Vieja" },
+    { id:"bellpeppers",       name:"Bell peppers",    note:"2 – Ropa Vieja" },
+    { id:"limes",             name:"Limes",           note:"2–3 – Garlic Butter Shrimp" },
+    { id:"cilantro",          name:"Cilantro",        note:"1 bunch – Garlic Butter Shrimp" },
+    { id:"oranges",           name:"Oranges",         note:"1–2 – Carnitas" },
+    { id:"greenonion",        name:"Green onions",    note:"1 bunch – Fried Rice" },
+    { id:"rec-turtle-greens", name:"Turtle greens",   note:"romaine, collards, or dandelion greens — for turtle" },
   ]},
   { section:"Meat & Seafood", items:[
-    { id:"chuckroast", name:"Chuck roast",      note:"~2 lb – Ropa Vieja, Friday" },
-    { id:"shrimp",     name:"Frozen shrimp",    note:"1 lb, peeled if cheap – Thursday" },
-    { id:"pork",       name:"Pork shoulder / butt", note:"~4 lb – carnitas, covers Sat & Sun" },
+    { id:"groundbeef",  name:"Ground beef (80/20)",    note:"1.25 lb – Hamburger Helper" },
+    { id:"pancetta-h",  name:"Pancetta or diced ham",  note:"6 oz – Peas & Shells" },
+    { id:"shrimp",      name:"Frozen shrimp",           note:"1 lb – Garlic Butter Shrimp" },
+    { id:"chuckroast",  name:"Chuck roast",             note:"2 lb – Ropa Vieja" },
+    { id:"pork",        name:"Pork shoulder / butt",    note:"4 lb – Carnitas (Sat 6/21)" },
   ]},
   { section:"Dairy", items:[
-    { id:"cheese", name:"Cheese, cheddar or melting block/shred", note:"1 large – quesadillas & mac" },
-    { id:"eggs",   name:"Eggs",   note:"1 dozen (optional cheap backup)" },
-    { id:"milk",   name:"Milk",   note:"only if you're out – for the boxed mac" },
+    { id:"eggs",  name:"Eggs",  note:"1 dozen – Fried Rice + backup" },
+    { id:"milk",  name:"Milk",  note:"if low – Hamburger Helper" },
   ]},
   { section:"Canned & Dry", items:[
-    { id:"tomatosauce",    name:"Tomato sauce",             note:"1 small can (8 oz) – Ropa Vieja + moros" },
-    { id:"dicedtomatoes", name:"Diced or crushed tomatoes", note:"1 can (14–15 oz) – Ropa Vieja" },
-    { id:"whitevnegar",   name:"White vinegar",             note:"small bottle – Ropa Vieja + moros" },
-    { id:"macncheese",  name:"Boxed mac & cheese",  note:"2 boxes (Thursday backup)" },
-    { id:"spaghetti",   name:"Spaghetti",            note:"1 box (1 lb), backup" },
-    { id:"marinara",    name:"Jar marinara / red sauce", note:"1 jar, backup" },
-    { id:"tortillas",   name:"Soft tortillas",       note:"1 pack – carnitas + general" },
+    { id:"hamburghelper",  name:"Hamburger Helper",        note:"1 box – Sat 6/14" },
+    { id:"shellpasta",     name:"Small shell pasta",       note:"1 lb – Peas & Shells" },
+    { id:"chickenbroth",   name:"Chicken broth",           note:"1 carton (32 oz) – Peas & Shells" },
+    { id:"soysauce",       name:"Soy sauce",               note:"1 bottle – Fried Rice" },
+    { id:"sesameoil",      name:"Sesame oil",              note:"small bottle – Fried Rice" },
+    { id:"dicedtomatoes",  name:"Diced tomatoes",          note:"1 can – Ropa Vieja" },
+    { id:"tomatosauce",    name:"Tomato sauce",            note:"1 can – Ropa Vieja" },
+    { id:"whitevnegar",    name:"White vinegar",           note:"small bottle – Ropa Vieja" },
+    { id:"tortillas",      name:"Soft tortillas",          note:"1 pack – Carnitas" },
   ]},
   { section:"Frozen", items:[
-    { id:"nuggets", name:"Frozen chicken nuggets",            note:"1 bag, backup" },
-    { id:"dessert", name:"Popsicles or ice cream sandwiches", note:"1 box – dessert" },
+    { id:"frozenpeas",    name:"Frozen peas",          note:"1 bag – Peas & Shells" },
+    { id:"frozenmixveg",  name:"Frozen peas & carrots",note:"1 bag – Fried Rice" },
+    { id:"frozenpizza",   name:"Frozen pizza",         note:"1 – Wed 6/18, kids cook" },
+  ]},
+  { section:"Household", items:[
+    { id:"rec-bread",        name:"Bread",        note:"sliced loaf" },
+    { id:"rec-paper-towels", name:"Paper towels", note:"" },
+    { id:"rec-dish-soap",    name:"Dish soap",    note:"" },
+    { id:"rec-trash-bags",   name:"Trash bags",   note:"" },
+  ]},
+  { section:"Other Store", items:[
+    { id:"rec-cat-food",   name:"Cat food",   note:"" },
+    { id:"rec-dog-food",   name:"Dog food",   note:"" },
+    { id:"rec-cat-litter", name:"Cat litter", note:"" },
   ]},
 ];
 

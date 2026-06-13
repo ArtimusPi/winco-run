@@ -239,7 +239,7 @@
   .taxtoggle.on{color:#a8d5b8;border-color:rgba(168,213,184,0.5);background:rgba(168,213,184,0.12);}
   .subrow{
     display:flex;align-items:center;justify-content:space-between;
-    margin-top:6px;font-size:12.5px;
+    margin-top:6px;font-size:12.5px;flex-wrap:wrap;row-gap:6px;
   }
   .remaining{font-family:var(--mono);font-weight:700;opacity:0.85;}
   .remaining.over{color:#ff8a7d;opacity:1;}
@@ -248,6 +248,14 @@
     color:var(--bar-ink);font-size:12px;font-weight:700;
     border-radius:9px;padding:6px 12px;cursor:pointer;
   }
+  .datactrls{display:flex;align-items:center;gap:8px;}
+  .databtn{
+    background:transparent;border:1px solid rgba(255,255,255,0.28);
+    color:var(--bar-ink);font-size:12px;font-weight:700;
+    border-radius:9px;padding:6px 12px;cursor:pointer;
+  }
+  .databtn:active{background:rgba(255,255,255,0.06);}
+  #backup{color:var(--green);border-color:rgba(82,201,122,0.5);}
 </style>
 </head>
 <body>
@@ -296,8 +304,13 @@
   </div>
   <div class="subrow">
     <span class="remaining" id="remaining">&nbsp;</span>
-    <button class="reset" id="reset">Reset</button>
+    <div class="datactrls">
+      <button class="databtn" id="backup">Backup</button>
+      <button class="databtn" id="restore">Restore</button>
+      <button class="reset" id="reset">Reset</button>
+    </div>
   </div>
+  <input type="file" id="restore-file" accept="application/json,.json" hidden>
 </footer>
 
 <script>
@@ -759,6 +772,66 @@ function showUpdateBanner(reg) {
   bar.appendChild(btn);
   document.body.prepend(bar);
 }
+
+/* ---------- data durability: persistent storage + backup / restore ---------- */
+(function(){
+  // Ask the browser to keep our data. Cuts the odds of iOS evicting localStorage after ~7 days unused.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persisted().then(function(already){
+      if (!already) navigator.storage.persist().catch(function(){});
+    }).catch(function(){});
+  }
+
+  function pad(n){ return String(n).padStart(2, "0"); }
+
+  // Backup: write every saved key on this phone (list + planner) to one JSON file.
+  function doBackup(){
+    var data = {};
+    for (var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      data[k] = localStorage.getItem(k);
+    }
+    var payload = { app: "winco-run", type: "winco-run-backup", version: 1, savedAt: new Date().toISOString(), data: data };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var d = new Date();
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "winco-run-backup-" + d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function doRestore(file){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var parsed;
+      try { parsed = JSON.parse(reader.result); }
+      catch(e){ alert("That file isn't readable as a backup."); return; }
+      var data = parsed && parsed.data;
+      if (!data || typeof data !== "object"){ alert("That file isn't a WinCo Run backup."); return; }
+      var keys = Object.keys(data);
+      var when = parsed.savedAt ? new Date(parsed.savedAt).toLocaleString() : "an unknown date";
+      if (!confirm("Restore " + keys.length + " saved item(s) from " + when + "?\nThis replaces what's saved on this phone now.")) return;
+      keys.forEach(function(k){ try { localStorage.setItem(k, data[k]); } catch(e){} });
+      location.reload();
+    };
+    reader.onerror = function(){ alert("Couldn't read that file."); };
+    reader.readAsText(file);
+  }
+
+  var backupBtn = document.getElementById("backup");
+  if (backupBtn) backupBtn.addEventListener("click", doBackup);
+  var restoreBtn = document.getElementById("restore");
+  var restoreFile = document.getElementById("restore-file");
+  if (restoreBtn && restoreFile){
+    restoreBtn.addEventListener("click", function(){ restoreFile.click(); });
+    restoreFile.addEventListener("change", function(){
+      if (restoreFile.files && restoreFile.files[0]) doRestore(restoreFile.files[0]);
+      restoreFile.value = "";
+    });
+  }
+})();
 </script>
 </body>
 </html>

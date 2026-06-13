@@ -1111,6 +1111,11 @@ function closeSheet(id) {
 renderWeek();
 renderRecipeList();
 
+/* data durability: ask the browser to keep our data (reduces iOS storage eviction) */
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persisted().then(already => { if (!already) navigator.storage.persist().catch(() => {}); }).catch(() => {});
+}
+
 if ("serviceWorker" in navigator) {
   let refreshing = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {

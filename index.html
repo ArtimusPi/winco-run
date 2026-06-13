@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080d09">
+<meta name="theme-color" content="#0e1910">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WinCo Run">
@@ -35,8 +35,8 @@
     --paper:#0e1910;
     --card:#1a2b1e;
     --ink:#dff2e3;
-    --ink-soft:#4a8462;
-    --line:#2a4434;
+    --ink-soft:#6fae86;
+    --line:#547e63;
     --green:#52c97a;
     --green-soft:#122018;
     --amber:#d4944a;
@@ -120,21 +120,22 @@
   }
   .item.checked{background:#0f1d13;border-color:#1f3428;}
   .check{
-    flex:0 0 auto;width:30px;height:30px;border-radius:9px;
+    position:relative;flex:0 0 auto;width:30px;height:30px;border-radius:9px;
     border:2px solid var(--line);background:var(--card);
     display:flex;align-items:center;justify-content:center;
-    font-size:17px;color:#fff;font-weight:900;cursor:pointer;margin-top:1px;
+    font-size:17px;color:#0e1910;font-weight:900;cursor:pointer;margin-top:1px;
   }
   .item.checked .check{background:var(--green);border-color:var(--green);}
+  .check::before{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%);}
   .check::after{content:"✓";opacity:0;}
   .item.checked .check::after{opacity:1;}
 
   .body{flex:1;min-width:0;}
-  .name{font-size:15.5px;font-weight:700;letter-spacing:-0.01em;padding-right:22px;}
+  .name{font-size:16px;font-weight:700;letter-spacing:-0.01em;padding-right:22px;}
   .item.checked .name{text-decoration:line-through;color:var(--ink-soft);}
-  .note{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+  .note{font-size:14px;color:var(--ink-soft);margin-top:1px;}
   .tag{
-    display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:0.05em;
+    display:inline-block;font-size:12px;font-weight:800;letter-spacing:0.05em;
     color:var(--amber);background:var(--amber-soft);
     padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;
   }
@@ -152,7 +153,7 @@
     width:64px;
   }
   .field.wt input{width:52px;}
-  .field .suf{font-size:12px;color:var(--ink-soft);font-weight:700;}
+  .field .suf{font-size:14px;color:var(--ink-soft);font-weight:700;}
   .x{font-family:var(--mono);color:var(--ink-soft);font-weight:700;font-size:14px;}
 
   .linetotal{
@@ -162,10 +163,12 @@
   .linetotal.empty{color:var(--line);}
 
   .modetoggle{
-    font-size:11px;font-weight:800;letter-spacing:0.03em;
+    position:relative;
+    font-size:12px;font-weight:800;letter-spacing:0.03em;
     color:var(--ink-soft);background:var(--card);border:1px solid var(--line);
     border-radius:8px;padding:6px 8px;cursor:pointer;
   }
+  .modetoggle::before{content:"";position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:44px;}
   .modetoggle.on{color:var(--amber);border-color:var(--amber);background:var(--amber-soft);}
 
   /* ---- delete button ---- */
@@ -177,6 +180,7 @@
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;opacity:0.45;padding:0;
   }
+  .delbtn::before{content:"";position:absolute;top:-8px;right:-8px;width:44px;height:44px;}
   .delbtn:active{opacity:1;color:var(--red);}
 
   /* ---- add-item UI ---- */
@@ -194,7 +198,7 @@
   .addform input{
     display:block;width:100%;
     border:1px solid var(--line);border-radius:10px;
-    padding:9px 10px;font-size:15px;font-family:var(--sans);
+    padding:9px 10px;font-size:16px;font-family:var(--sans);
     background:var(--paper);color:var(--ink);outline:none;
     margin-bottom:8px;
   }
@@ -256,6 +260,31 @@
   }
   .databtn:active{background:rgba(255,255,255,0.06);}
   #backup{color:var(--green);border-color:rgba(82,201,122,0.5);}
+
+  /* ---- tabular figures: keep numbers/totals from shifting as values update ---- */
+  .tot,.linetotal,.remaining,.progress,.taxamt,.budget input,.field input{font-variant-numeric:tabular-nums;}
+
+  /* ---- undo toast (reset / delete recovery) ---- */
+  .toast{
+    position:fixed;left:16px;right:16px;bottom:90px;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:#21392b;border:1px solid var(--green);
+    color:var(--ink);border-radius:12px;
+    padding:10px 12px 10px 16px;
+    font-size:14px;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,0.38);
+    opacity:0;transform:translateY(8px);
+    transition:opacity 0.2s,transform 0.2s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+  .toast-msg{flex:1;min-width:0;}
+  .toast-action{
+    flex-shrink:0;min-height:44px;
+    background:var(--green);color:#0e1910;
+    border:0;border-radius:9px;padding:0 18px;
+    font-size:14px;font-weight:800;cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -396,6 +425,72 @@ function lineTotal(item){
 function money(n){ return "$" + n.toFixed(2); }
 function customForSection(section){ return (state.custom||[]).filter(c => c.section===section && !st(c.id).hidden); }
 
+/* ---- undo snapshot + toast (destructive action recovery) ---- */
+const UNDO_KEY = "undo_snapshot";
+function snapshotForUndo(){
+  try{ localStorage.setItem(UNDO_KEY, JSON.stringify({ [KEY]: localStorage.getItem(KEY) })); }catch(e){}
+}
+function restoreFromUndo(){
+  try{
+    const snap = JSON.parse(localStorage.getItem(UNDO_KEY));
+    if(snap && typeof snap === "object"){
+      Object.keys(snap).forEach(k => {
+        if(snap[k] === null) localStorage.removeItem(k);
+        else localStorage.setItem(k, snap[k]);
+      });
+    }
+  }catch(e){}
+  localStorage.removeItem(UNDO_KEY);
+  state = load();
+  render();
+}
+function clearUndoSnapshot(){ try{ localStorage.removeItem(UNDO_KEY); }catch(e){} }
+
+let toastTimer = null;
+function showToast(message, actionLabel, onAction, onExpire){
+  const old = document.getElementById("toast");
+  if(old) old.remove();
+  if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+
+  const toast = document.createElement("div");
+  toast.id = "toast";
+  toast.className = "toast";
+
+  const msg = document.createElement("span");
+  msg.className = "toast-msg";
+  msg.textContent = message;
+  toast.appendChild(msg);
+
+  if(actionLabel && onAction){
+    const btn = document.createElement("button");
+    btn.className = "toast-action";
+    btn.textContent = actionLabel;
+    btn.addEventListener("click", () => {
+      if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+      onAction();
+      hideToast();
+    });
+    toast.appendChild(btn);
+  }
+
+  document.body.appendChild(toast);
+  const footer = document.querySelector("footer");
+  toast.style.bottom = ((footer ? footer.offsetHeight : 90) + 12) + "px";
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  toastTimer = setTimeout(() => {
+    toastTimer = null;
+    if(onExpire) onExpire();
+    hideToast();
+  }, 8000);
+}
+function hideToast(){
+  const toast = document.getElementById("toast");
+  if(!toast) return;
+  toast.classList.remove("show");
+  setTimeout(() => { if(toast && toast.parentNode) toast.remove(); }, 250);
+}
+
 /* ---- render ---- */
 function render(){
   const list = document.getElementById("list");
@@ -508,17 +603,15 @@ function buildRow(item){
   del.setAttribute("aria-label","Remove "+item.name);
   del.addEventListener("click", e => {
     e.stopPropagation();
-    const msg = isCustom
-      ? "Remove “"+item.name+"”?"
-      : "Hide “"+item.name+"” this run?\n(Reset brings it back)";
-    if(confirm(msg)){
-      if(isCustom){
-        state.custom = (state.custom||[]).filter(c => c.id!==item.id);
-      } else {
-        st(item.id).hidden = true;
-      }
-      save(); render();
+    snapshotForUndo();
+    const verb = isCustom ? "Removed" : "Hid";
+    if(isCustom){
+      state.custom = (state.custom||[]).filter(c => c.id!==item.id);
+    } else {
+      st(item.id).hidden = true;
     }
+    save(); render();
+    showToast(verb+" "+item.name+".", "Undo", restoreFromUndo, clearUndoSnapshot);
   });
   el.appendChild(del);
 
@@ -633,7 +726,7 @@ function updateTotals(){
   if(budget>0){
     const left = budget-grand;
     if(left>=0){ rem.textContent=money(left)+" left of "+money(budget); rem.classList.remove("over"); }
-    else { rem.textContent=money(Math.abs(left))+" over budget"; rem.classList.add("over"); }
+    else { rem.textContent="OVER by "+money(Math.abs(left)); rem.classList.add("over"); }
   } else {
     rem.innerHTML="&nbsp;";
     rem.classList.remove("over");
@@ -645,10 +738,10 @@ document.getElementById("budget").addEventListener("input", e => {
   state.budget=e.target.value; save(); updateTotals();
 });
 document.getElementById("reset").addEventListener("click", () => {
-  if(confirm("Clear all prices, checkmarks, and hidden items?")){
-    state={ budget:"", hideChecked:false, taxOn:false, items:{}, custom:[] };
-    save(); render();
-  }
+  snapshotForUndo();
+  state={ budget:"", hideChecked:false, taxOn:false, items:{}, custom:[] };
+  save(); render();
+  showToast("List reset.", "Undo", restoreFromUndo, clearUndoSnapshot);
 });
 document.getElementById("hidebtn").addEventListener("click", () => {
   state.hideChecked=!state.hideChecked; save(); render();
@@ -723,6 +816,7 @@ function applyGeneratedList(){
 
 loadGeneratedList();
 applyGeneratedList();
+clearUndoSnapshot();
 render();
 
 if ("serviceWorker" in navigator) {
